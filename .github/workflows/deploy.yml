@@ -47,6 +47,7 @@ jobs:
       with:
         host: 129.154.244.155
         username: ubuntu
+        key: ssh-key-2025-11-29.key
         source: "noip-callback/"
         target: "~/"
 
@@ -55,6 +56,7 @@ jobs:
       with:
         host: 129.154.244.155
         username: ubuntu
+        key: ssh-key-2025-11-29.key
         script: |
           cd ~/noip-callback
           echo "NOIP_USERNAME=${{ secrets.NOIP_USERNAME }}" > .env

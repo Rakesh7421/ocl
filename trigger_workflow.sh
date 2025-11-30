@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Script to trigger GitHub Actions workflow manually
-# Requires GitHub CLI (gh) to be installed and authenticated
+# Script to run GitHub Actions workflow locally using act
+# Requires act and Docker to be installed and running
 
-WORKFLOW_FILE=".github/workflows/deploy.yml"
+JOB_NAME="deploy"
 
-echo "Triggering workflow: $WORKFLOW_FILE"
-gh workflow run "$WORKFLOW_FILE"
+echo "Running workflow job: $JOB_NAME locally with act"
+act -j "$JOB_NAME"
 
-echo "Workflow triggered successfully"
+echo "Workflow run completed"
