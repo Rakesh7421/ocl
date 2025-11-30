@@ -2,7 +2,7 @@ name: Deploy No-IP Callback Server
 
 on:
   push:
-    branches: [ main ]
+    branches: [ Developing-yet ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
