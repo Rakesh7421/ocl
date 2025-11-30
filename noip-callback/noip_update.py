@@ -6,7 +6,7 @@ load_dotenv()
 
 USER = os.getenv("NOIP_USERNAME")
 PASS = os.getenv("NOIP_PASSWORD")
-HOST = os.getenv("NOIP_HOST")
+HOST = os.getenv("NOIP_DOMAIN")
 
 def update_noip():
     url = f"https://dynupdate.no-ip.com/nic/update?hostname={HOST}"

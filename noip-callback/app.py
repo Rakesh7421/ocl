@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-HOST = os.getenv("NOIP_HOST")
+HOST = os.getenv("NOIP_DOMAIN")
 
 app = Flask(__name__, template_folder='template')
 
