@@ -5,7 +5,7 @@ ssh-key*
 !.github
 
 
-
+OCI-ssh-key.key.pub
 
 noip-callback/__pycache__
 
