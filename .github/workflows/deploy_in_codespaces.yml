@@ -1,4 +1,4 @@
-name: Deploy No-IP Callback Server
+name: Deploy in Codespaces
 
 on:
   push:
