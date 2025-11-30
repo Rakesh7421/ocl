@@ -8,12 +8,12 @@
 # - NOIP_USERNAME: No-IP account username
 # - NOIP_PASSWORD: No-IP account password
 # - NOIP_HOST: Your No-IP domain name (e.g., yourname.ddns.net)
-# - OCI_USER_OCID: OCI user OCID
-# - OCI_FINGERPRINT: OCI API key fingerprint
-# - OCI_PRIVATE_KEY: OCI private key content
-# - OCI_TENANCY_OCID: OCI tenancy OCID
-# - OCI_REGION: OCI region (e.g., us-ashburn-1)
-# - OCI_COMPARTMENT_OCID: OCI compartment OCID
+# - OCI_USER_OCID: OCI user OCID (found in OCI Console > Identity > Users > your user > OCID)
+# - OCI_FINGERPRINT: OCI API key fingerprint (generate API key pair: openssl genrsa -out oci_api_key.pem 2048; openssl rsa -pubout -in oci_api_key.pem -out oci_api_key_public.pem; add public key in OCI Console > Identity > Users > your user > API Keys > Add Public Keys; fingerprint shown after adding)
+# - OCI_PRIVATE_KEY: OCI private key content (content of the private key file oci_api_key.pem generated above)
+# - OCI_TENANCY_OCID: OCI tenancy OCID (found in OCI Console > Administration > Tenancy Details > OCID)
+# - OCI_REGION: OCI region (e.g., us-ashburn-1; found in OCI Console URL or region selector)
+# - OCI_COMPARTMENT_OCID: OCI compartment OCID (found in OCI Console > Identity > Compartments > your compartment > OCID)
 #
 name: Deploy No-IP Callback Server
 
