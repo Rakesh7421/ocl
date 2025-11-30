@@ -78,7 +78,7 @@ jobs:
       run: |
         # Install OCI CLI
         pip install oci-cli
-        
+
         # Create OCI config
         mkdir -p ~/.oci
         cat > ~/.oci/config << EOF
@@ -91,7 +91,10 @@ jobs:
         EOF
         echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/private_key.pem
         chmod 600 ~/.oci/private_key.pem
-        
+
+        # Test OCI authentication
+        oci iam region list --output table
+
         # Get instance OCID by public IP
         INSTANCE_OCID=$(oci compute instance list --compartment-id ${{ secrets.OCI_COMPARTMENT_OCID }} --query "data[?\"public-ip\"=='${{ secrets.OCI_HOST }}'].id | [0]" --raw-output)
         echo "Instance OCID: $INSTANCE_OCID"
