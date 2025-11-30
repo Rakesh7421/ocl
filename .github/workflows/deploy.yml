@@ -1,5 +1,14 @@
 # Failure info: dial tcp 172.182.225.194:22: i/o timeout
 # Updated for server deployment
+#
+# Required secrets:
+# - OCI_HOST: Public IP address of the OCI instance (e.g., 123.456.789.0)
+# - OCI_USER: SSH username for the OCI instance (e.g., ubuntu or opc)
+# - SSH_PRIVATE_KEY: Private SSH key content for connecting to OCI instance
+# - NOIP_USERNAME: No-IP account username
+# - NOIP_PASSWORD: No-IP account password
+# - NOIP_HOST: No-IP hostname to update
+#129.154.244.155
 name: Deploy No-IP Callback Server
 
 on:
@@ -16,31 +25,40 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    
+    - name: Copy code to OCI instance
+      uses: appleboy/scp-action@v0.1.4
       with:
-        python-version: '3.x'
-
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r noip-callback/requirements.txt
-
-    - name: Update NO-IP and run server
-      run: |
-        cd noip-callback
-        echo "NOIP_USERNAME=${{ secrets.NOIP_USERNAME }}" > .env
-        echo "NOIP_PASSWORD=${{ secrets.NOIP_PASSWORD }}" >> .env
-        echo "NOIP_HOST=${{ secrets.NOIP_HOST }}" >> .env
-        python3 -m venv venv
-        source venv/bin/activate
-        pip install -r requirements.txt
-        python noip_update.py
-        nohup python app.py &
-
-    - name: Check server is running
-      run: |
-        sleep 5
-        curl -I http://localhost:8080
-        echo "Server check completed"
+        host: ${{ secrets.OCI_HOST }}
+        username: ${{ secrets.OCI_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: "noip-callback/"
+        target: "~/"
+    
+    - name: Deploy to OCI instance
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.OCI_HOST }}
+        username: ${{ secrets.OCI_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd noip-callback
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          echo "NOIP_USERNAME=${{ secrets.NOIP_USERNAME }}" > .env
+          echo "NOIP_PASSWORD=${{ secrets.NOIP_PASSWORD }}" >> .env
+          echo "NOIP_HOST=${{ secrets.NOIP_HOST }}" >> .env
+          python noip_update.py
+          nohup python app.py &
+    
+    - name: Check server is running on OCI
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.OCI_HOST }}
+        username: ${{ secrets.OCI_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          sleep 5
+          curl -I http://localhost:8080
+          echo "Server check completed"
