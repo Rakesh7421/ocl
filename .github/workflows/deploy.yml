@@ -35,7 +35,7 @@ jobs:
     - name: Copy files to server
       uses: appleboy/scp-action@v0.1.4
       with:
-        host: 129.154.244.155
+        host: ${{ secrets.NOIP_HOST }}
         username: ubuntu
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         source: "noip-callback/"
@@ -44,9 +44,9 @@ jobs:
     - name: Deploy and run on server
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: 129.154.244.155
+        host: ${{ secrets.NOIP_HOST }}
         username: ubuntu
-        key_path: ssh-key-2025-11-29.key
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd ~/noip-callback
           echo "NOIP_USERNAME=${{ secrets.NOIP_USERNAME }}" > .env
