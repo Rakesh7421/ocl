@@ -8,7 +8,13 @@
 # - NOIP_USERNAME: No-IP account username
 # - NOIP_PASSWORD: No-IP account password
 # - NOIP_HOST: Your No-IP domain name (e.g., yourname.ddns.net)
-#129.154.244.155
+# - OCI_USER_OCID: OCI user OCID
+# - OCI_FINGERPRINT: OCI API key fingerprint
+# - OCI_PRIVATE_KEY: OCI private key content
+# - OCI_TENANCY_OCID: OCI tenancy OCID
+# - OCI_REGION: OCI region (e.g., us-ashburn-1)
+# - OCI_COMPARTMENT_OCID: OCI compartment OCID
+#
 name: Deploy No-IP Callback Server
 
 on:
@@ -64,9 +70,53 @@ jobs:
           echo "Server check completed"
     - name: Check domain availability
       run: |
-        sleep 30
+        sleep 10
         curl -I http://${{ secrets.NOIP_HOST }}:8080
         echo "Domain check completed"
+    - name: Check OCI instance network configuration
+      if: failure()
+      run: |
+        # Install OCI CLI
+        pip install oci-cli
+        
+        # Create OCI config
+        mkdir -p ~/.oci
+        cat > ~/.oci/config << EOF
+        [DEFAULT]
+        user=${{ secrets.OCI_USER_OCID }}
+        fingerprint=${{ secrets.OCI_FINGERPRINT }}
+        key_file=~/.oci/private_key.pem
+        tenancy=${{ secrets.OCI_TENANCY_OCID }}
+        region=${{ secrets.OCI_REGION }}
+        EOF
+        echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/private_key.pem
+        chmod 600 ~/.oci/private_key.pem
+        
+        # Get instance OCID by public IP
+        INSTANCE_OCID=$(oci compute instance list --compartment-id ${{ secrets.OCI_COMPARTMENT_OCID }} --query "data[?\"public-ip\"=='${{ secrets.OCI_HOST }}'].id | [0]" --raw-output)
+        echo "Instance OCID: $INSTANCE_OCID"
+        
+        # Get VNIC OCID
+        VNIC_OCID=$(oci compute instance list-vnics --instance-id $INSTANCE_OCID --query "data[0].id" --raw-output)
+        echo "VNIC OCID: $VNIC_OCID"
+        
+        # Get subnet OCID
+        SUBNET_OCID=$(oci network vnic get --vnic-id $VNIC_OCID --query "data.\"subnet-id\"" --raw-output)
+        echo "Subnet OCID: $SUBNET_OCID"
+        
+        # Get VCN OCID
+        VCN_OCID=$(oci network subnet get --subnet-id $SUBNET_OCID --query "data.\"vcn-id\"" --raw-output)
+        echo "VCN OCID: $VCN_OCID"
+        
+        # Get security list IDs
+        SECURITY_LIST_IDS=$(oci network vnic get --vnic-id $VNIC_OCID --query "data.\"security-list-ids\" | join(' ', @)" --raw-output)
+        echo "Security List IDs: $SECURITY_LIST_IDS"
+        
+        # Check ingress rules for each security list
+        for SL_ID in $SECURITY_LIST_IDS; do
+          echo "Security List $SL_ID ingress rules:"
+          oci network security-list get --security-list-id $SL_ID --query "data.\"ingress-security-rules\""
+        done
 
     - name: Wait for manual verification
       run: sleep 100
