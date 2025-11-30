@@ -1,0 +1,73 @@
+name: Deploy No-IP Callback Server
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/deploy.yml'
+  pull_request:
+    paths:
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r noip-callback/requirements.txt
+
+    - name: Install NO-IP DUC
+      run: |
+        sudo apt update
+        sudo apt install -y wget build-essential
+        wget https://www.noip.com/client/linux/noip-duc-linux.tar.gz
+        tar xf noip-duc-linux.tar.gz
+        cd noip-2.1.9-1/
+        sudo make
+        sudo make install
+
+    - name: Update NO-IP IP
+      run: |
+        cd noip-callback
+        NOIP_USERNAME=${{ secrets.NOIP_USERNAME }} NOIP_PASSWORD=${{ secrets.NOIP_PASSWORD }} NOIP_HOST=${{ secrets.NOIP_HOST }} python noip_update.py
+      env:
+        NOIP_HOST: propogate.ddns.net
+
+    - name: Copy files to server
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: 129.154.244.155
+        username: ubuntu
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: "noip-callback/"
+        target: "~/"
+
+    - name: Deploy and run on server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: 129.154.244.155
+        username: ubuntu
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd ~/noip-callback
+          echo "NOIP_USERNAME=${{ secrets.NOIP_USERNAME }}" > .env
+          echo "NOIP_PASSWORD=${{ secrets.NOIP_PASSWORD }}" >> .env
+          echo "NOIP_HOST=${{ secrets.NOIP_HOST }}" >> .env
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          # Kill any existing process on port 8080
+          sudo pkill -f "python.*app.py" || true
+          nohup python app.py &

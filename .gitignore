@@ -2,7 +2,7 @@ data
 ssh-key*
 .vscode
 .venv
-.github
+!.github
 
 
 
