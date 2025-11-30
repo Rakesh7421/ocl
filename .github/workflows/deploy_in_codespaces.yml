@@ -2,7 +2,7 @@ name: Deploy in Codespaces
 
 on:
   push:
-    branches: [ Developing-yet ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
