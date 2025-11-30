@@ -25,16 +25,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r noip-callback/requirements.txt
 
-    - name: Install NO-IP DUC
-      run: |
-        sudo apt update
-        sudo apt install -y wget build-essential
-        wget https://www.noip.com/client/linux/noip-duc-linux.tar.gz
-        tar xf noip-duc-linux.tar.gz
-        cd noip-2.1.9-1/
-        sudo make
-        sudo make install
-
     - name: Update NO-IP IP
       run: |
         cd noip-callback
