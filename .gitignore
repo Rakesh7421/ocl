@@ -1,0 +1,16 @@
+data
+ssh-key*
+.vscode
+.venv
+.github
+
+
+
+
+noip-callback/__pycache__
+
+
+
+
+noip-callback/gitaction.txt
+noip-callback/.env
