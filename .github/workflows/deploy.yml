@@ -7,7 +7,7 @@
 # - SSH_PRIVATE_KEY: Private SSH key content for connecting to OCI instance
 # - NOIP_USERNAME: No-IP account username
 # - NOIP_PASSWORD: No-IP account password
-# - NOIP_HOST: No-IP hostname to update
+# - NOIP_HOST: Your No-IP domain name (e.g., yourname.ddns.net)
 #129.154.244.155
 name: Deploy No-IP Callback Server
 
