@@ -32,9 +32,15 @@ jobs:
         cd noip-callback
         echo "NOIP_USERNAME=${{ secrets.NOIP_USERNAME }}" > .env
         echo "NOIP_PASSWORD=${{ secrets.NOIP_PASSWORD }}" >> .env
-        echo "NOIP_DOMAIN=${{ secrets.NOIP_DOMAIN }}" >> .env
+        echo "NOIP_HOST=${{ secrets.NOIP_HOST }}" >> .env
         python3 -m venv venv
         source venv/bin/activate
         pip install -r requirements.txt
         python noip_update.py
-        python app.py
+        nohup python app.py &
+
+    - name: Check server is running
+      run: |
+        sleep 5
+        curl -I http://localhost:8080
+        echo "Server check completed"
