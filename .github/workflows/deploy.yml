@@ -62,3 +62,18 @@ jobs:
           sleep 5
           curl -I http://localhost:8080
           echo "Server check completed"
+    
+    - name: Check domain availability
+      run: |
+        sleep 30
+        curl -I http://${{ secrets.NOIP_HOST }}:8080
+        echo "Domain check completed"
+    
+    - name: Check OCI network settings if domain unavailable
+      if: failure()
+      run: |
+        echo "Domain not accessible publicly. Please check OCI network settings:"
+        echo "- Ensure the Security List for the instance allows inbound traffic on port 8080 from 0.0.0.0/0"
+        echo "- Verify the instance is assigned a public IP address"
+        echo "- Confirm that the No-IP domain DNS has propagated (may take up to 5-10 minutes)"
+        echo "- Check if the server is running correctly on the OCI instance"
