@@ -62,12 +62,14 @@ jobs:
           sleep 5
           curl -I http://localhost:8080
           echo "Server check completed"
-    
     - name: Check domain availability
       run: |
         sleep 30
         curl -I http://${{ secrets.NOIP_HOST }}:8080
         echo "Domain check completed"
+
+    - name: Wait for manual verification
+      run: sleep 100
     
     - name: Check OCI network settings if domain unavailable
       if: failure()
